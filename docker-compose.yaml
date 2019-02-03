@@ -15,6 +15,26 @@ services:
       - .env
     environment:
       - CGO_ENABLED=0
+    networks:
+      - redis-net
+    depends_on:
+      - redis
     command:
       - /go/bin/fresh
     restart: always
+
+  redis:
+    image: redis:5.0.3-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    networks:
+      - redis-net
+    volumes:
+      - redis-data:/data
+
+
+networks:
+  redis-net:
+
+volumes:
+  redis-data:
