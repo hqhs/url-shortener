@@ -1,1 +1,5 @@
 url-shortener
+.env
+dbdata/*
+bin/*
+tmp/*

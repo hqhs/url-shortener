@@ -1,0 +1,13 @@
+CONTRIBUTORS
+LICENSE
+README.md
+
+Dockerfile
+docker-compose.yaml
+Makefile
+bin/*
+
+.caddy/
+dbdata/*
+front/*
+static/*
