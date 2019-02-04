@@ -6,6 +6,11 @@ import (
 	"github.com/go-chi/render"
 )
 
+// ShortenURL is api endpoint for creating short versions of urls
+func ShortenURL(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // ListArticles ...
 func ListArticles(w http.ResponseWriter, r *http.Request) {
 	if err := render.RenderList(w, r, NewArticleListResponse(articles)); err != nil {

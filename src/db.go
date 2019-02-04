@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+	"net/url"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -21,6 +22,11 @@ func NewPool(addr string) *redis.Pool {
 //--
 // Data model objects and persistence mocks:
 //--
+
+// Url represents a 'Uniform Resource Locator' :)
+type Url struct {
+	*url.URL
+}
 
 // User data model
 type User struct {

@@ -35,6 +35,7 @@ func init() {
 	}
 }
 
+
 // NewRouter initializes router with urls and middleware and return it
 func NewRouter(pool *redis.Pool) *chi.Mux {
 	r := chi.NewRouter()
@@ -43,23 +44,26 @@ func NewRouter(pool *redis.Pool) *chi.Mux {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
-	r.Use(render.SetContentType(render.ContentTypeJSON))
-
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("root."))
-	})
-
-	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("pong"))
-	})
-
-	r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
-		panic("test")
-	})
 
 	// RESTy routes for "articles" resource
-	r.Route("/articles", func(r chi.Router) {
+	r.Route("/api", func(r chi.Router) {
+		r.Use(render.SetContentType(render.ContentTypeJSON))
 		r.Use(GetDatabaseMiddleware(pool))
+
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("root."))
+		})
+
+		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("pong"))
+		})
+
+		r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
+			panic("test")
+		})
+
+		r.Mount("/v1", APIv1())
+
 		r.With(Paginate).Get("/", ListArticles)
 		r.Post("/", CreateArticle)       // POST /articles
 		r.Get("/search", SearchArticles) // GET /articles/search
@@ -78,6 +82,13 @@ func NewRouter(pool *redis.Pool) *chi.Mux {
 	// Mount the admin sub-router, which btw is the same as:
 	// r.Route("/admin", func(r chi.Router) { admin routes here })
 	r.Mount("/admin", adminRouter())
+	return r
+}
+
+// APIv1 initializes router for first api version
+func APIv1() chi.Router {
+	r := chi.NewRouter()
+	r.Post("/shorten", ShortenURL)
 	return r
 }
 
