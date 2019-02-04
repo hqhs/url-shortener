@@ -4,7 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"time"
+
+	"github.com/gomodule/redigo/redis"
 )
+
+// NewPool initializes database connection
+func NewPool(addr string) *redis.Pool {
+	return &redis.Pool{
+		MaxIdle: 3,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) { return redis.Dial("tcp", addr) },
+	}
+}
 
 //--
 // Data model objects and persistence mocks:

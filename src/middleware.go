@@ -6,7 +6,31 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/gomodule/redigo/redis"
 )
+
+// ContextKey represent key used for values in r.Context()
+type ContextKey int
+
+const (
+	// DatabaseKey used for db connection
+	DatabaseKey ContextKey = iota
+)
+
+// GetDatabaseMiddleware returns middleware which add redis conn to every
+// request's context
+func GetDatabaseMiddleware(p *redis.Pool) (func(http.Handler) http.Handler) {
+	// NOTE: Generally speaking, this one is arguable, but better then
+	// global pool variable and easier then struct embedding
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			conn := p.Get()
+			ctx := context.WithValue(r.Context(), DatabaseKey, conn)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			conn.Close()
+		})
+	}
+}
 
 // Paginate is a stub, but very possible to implement middleware logic
 // to handle the request params for handling a paginated request.

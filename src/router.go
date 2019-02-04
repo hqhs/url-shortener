@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"github.com/gomodule/redigo/redis"
 )
 
 // This is entirely optional, but I wanted to demonstrate how you could easily
@@ -35,7 +36,7 @@ func init() {
 }
 
 // NewRouter initializes router with urls and middleware and return it
-func NewRouter() *chi.Mux {
+func NewRouter(pool *redis.Pool) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -58,6 +59,7 @@ func NewRouter() *chi.Mux {
 
 	// RESTy routes for "articles" resource
 	r.Route("/articles", func(r chi.Router) {
+		r.Use(GetDatabaseMiddleware(pool))
 		r.With(Paginate).Get("/", ListArticles)
 		r.Post("/", CreateArticle)       // POST /articles
 		r.Get("/search", SearchArticles) // GET /articles/search

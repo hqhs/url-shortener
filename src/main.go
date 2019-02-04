@@ -50,7 +50,10 @@ var routes = flag.Bool("routes", false, "Generate router documentation")
 
 func main() {
 	flag.Parse()
-	r := NewRouter()
+
+	// TODO make pong request to redis before initializing router
+	p := NewPool("redis:6379")
+	r := NewRouter(p)
 
 	fmt.Println("Initialized router...")
 
@@ -65,6 +68,7 @@ func main() {
 		}))
 		return
 	}
+
 	http.ListenAndServe(":3333", r)
 }
 
