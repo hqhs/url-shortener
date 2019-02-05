@@ -107,6 +107,11 @@ func decodeURL(short string) (int64, error) {
 	return id, nil
 }
 
+// Stats represents shorter url usage statistics
+type Stats struct {
+
+}
+
 // User data model
 type User struct {
 	ID   int64  `json:"id"`

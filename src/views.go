@@ -11,6 +11,11 @@ func ShortenURL(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Redirect URL redirects from short url to its original
+func RedirectURL(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // ListArticles ...
 func ListArticles(w http.ResponseWriter, r *http.Request) {
 	if err := render.RenderList(w, r, NewArticleListResponse(articles)); err != nil {
@@ -18,7 +23,6 @@ func ListArticles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 // SearchArticles searches the Articles data for a matching article.
 // It's just a stub, but you get the idea.
