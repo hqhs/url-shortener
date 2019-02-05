@@ -1,11 +1,11 @@
 Classic service example: URL shortener
 ===
 
-# features
+### Features
 
-# code coverage
+### Code coverage
 
-# statistics: codebase size & time spent
+### statistics: codebase size & time spent
 
-# possible improvements
+### possible improvements
 
