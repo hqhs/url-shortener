@@ -3,4 +3,5 @@ url-shortener
 dbdata/*
 bin/*
 
+tmp/*
 src/tmp/*

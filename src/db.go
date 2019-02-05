@@ -6,9 +6,31 @@ import (
 	"math/rand"
 	"time"
 	"net/url"
+	"encoding/binary"
+	"encoding/base64"
 
 	"github.com/gomodule/redigo/redis"
 )
+
+type prefix byte
+
+const (
+	urlStats prefix = iota
+	urlID
+	key
+)
+
+// IdKey used for
+const IdKey = "urlId"
+
+// GetOrCreateID TODO
+func GetOrCreateID(conn redis.Conn) (int64, error) {
+	id, err := redis.Int64(conn.Do("GET", IdKey))
+	if err != nil {
+		return redis.Int64(conn.Do("SET", IdKey, 0))
+	}
+	return id, err
+}
 
 // NewPool initializes database connection
 func NewPool(addr string) *redis.Pool {
@@ -23,9 +45,66 @@ func NewPool(addr string) *redis.Pool {
 // Data model objects and persistence mocks:
 //--
 
-// Url represents a 'Uniform Resource Locator' :)
-type Url struct {
+
+// URL represents a 'Uniform Resource Locator' :)
+type URL struct {
 	*url.URL
+}
+
+// ParseURL parses rew string into URL structure
+func ParseURL(u string) (URL, error) {
+	url, err := url.Parse(u)
+	if err != nil {
+		return URL{}, err
+	}
+	return URL{url}, nil
+}
+
+// SaveURL saves given url and returns it's shorten version
+func (u *URL) SaveURL(conn redis.Conn) (string, error) {
+	// TODO: check there's no such url in database
+	s := u.String()
+	id, _ := redis.Int64(conn.Do("GET", IdKey))
+	conn.Do("INCR", IdKey)
+	_, err := redis.String(conn.Do("SET", id, s))
+	if err != nil {
+		return "", err
+	}
+	short := encodeURL(id)
+	return short, nil
+}
+
+func encodeURL(id int64) string {
+	// So, encoding algorithm requires managing of a LOT of corner
+	// cases, such as: spam filtering, no nasty words in shorten url versions, etc
+	// I skipped all of them and just do base64 encoding of id
+	bs := make([]byte, binary.MaxVarintLen64)
+	n := binary.PutVarint(bs, id)
+	bs = bs[:n]
+	return base64.StdEncoding.EncodeToString(bs)
+}
+
+// DbGetURL gets short url and decode it
+func DbGetURL(short string, conn redis.Conn) (string, error) {
+	id, err := decodeURL(short)
+	if err != nil {
+		return "", err
+	}
+	return redis.String(conn.Do("GET", id))
+}
+
+func decodeURL(short string) (int64, error) {
+	bs, err := base64.StdEncoding.DecodeString(short)
+	if err != nil {
+		return int64(-1), err
+	}
+	id, n := binary.Varint(bs)
+	if n < 0 {
+		return int64(-1), fmt.Errorf("value larget then 64 bits")
+	} else if n == 0 {
+		return int64(-1), fmt.Errorf("buf too small")
+	}
+	return id, nil
 }
 
 // User data model

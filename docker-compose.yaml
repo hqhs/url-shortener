@@ -35,6 +35,7 @@ services:
 
 networks:
   redis-net:
+    driver: bridge
 
 volumes:
   redis-data:
