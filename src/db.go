@@ -1,10 +1,10 @@
 package main
 
 import (
+	"time"
 	"errors"
 	"fmt"
 	"math/rand"
-	"time"
 	"net/url"
 	"encoding/binary"
 	"encoding/base64"
@@ -12,22 +12,22 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type prefix byte
-
 const (
-	urlStats prefix = iota
-	urlID
-	key
+	urlStats byte = iota
+	urlIDCounter
+	urlKey
 )
 
 // IdKey used for
-const IdKey = "urlId"
+const IdKey = "url:id"
+	// append([]byte{ urlIDCounter }, []byte("urlId")...)
 
 // GetOrCreateID TODO
 func GetOrCreateID(conn redis.Conn) (int64, error) {
-	id, err := redis.Int64(conn.Do("GET", IdKey))
+	key := insertPrefixInKey(urlIDCounter, IdKey)
+	id, err := redis.Int64(conn.Do("GET", key))
 	if err != nil {
-		return redis.Int64(conn.Do("SET", IdKey, 0))
+		return redis.Int64(conn.Do("SET", key, 0))
 	}
 	return id, err
 }
@@ -64,9 +64,14 @@ func ParseURL(u string) (URL, error) {
 func (u *URL) SaveURL(conn redis.Conn) (string, error) {
 	// TODO: check there's no such url in database
 	s := u.String()
-	id, _ := redis.Int64(conn.Do("GET", IdKey))
-	conn.Do("INCR", IdKey)
-	_, err := redis.String(conn.Do("SET", id, s))
+	var key []byte
+
+	key = insertPrefixInKey(urlIDCounter, IdKey)
+	id, _ := redis.Int64(conn.Do("GET", key))
+	conn.Do("INCR", key)
+
+	key = insertPrefixInKey(urlKey, string(id))
+	_, err := redis.String(conn.Do("SET", key, s))
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +95,8 @@ func DbGetURL(short string, conn redis.Conn) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return redis.String(conn.Do("GET", id))
+	key := insertPrefixInKey(urlKey, string(id))
+	return redis.String(conn.Do("GET", key))
 }
 
 func decodeURL(short string) (int64, error) {
@@ -107,10 +113,17 @@ func decodeURL(short string) (int64, error) {
 	return id, nil
 }
 
+func insertPrefixInKey(prefix byte, key string) []byte {
+	return append([]byte{prefix}, []byte(key)...)
+}
+
+
 // Stats represents shorter url usage statistics
 type Stats struct {
-
+	created time.Time
 }
+
+// EXAMPLE CODE BELOW:
 
 // User data model
 type User struct {

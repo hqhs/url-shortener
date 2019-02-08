@@ -67,6 +67,7 @@ func TestInvalidUrl(t *testing.T) {
 }
 
 func process(data string, id int64) (string, string, error) {
+	var key []byte
 	conn := redigomock.NewConn()
 	conn.Clear()
 	// data
@@ -75,9 +76,11 @@ func process(data string, id int64) (string, string, error) {
 		return "", "", err
 	}
 	// saving & processing
-	conn.Command("GET", IdKey).Expect(id)
-	conn.Command("INCR", IdKey).Expect(id + 1)
-	conn.Command("SET", id, data).Expect("ok")
+	key = insertPrefixInKey(urlIDCounter, string(IdKey))
+	conn.Command("GET", key).Expect(id)
+	conn.Command("INCR", key).Expect(id + 1)
+	key = insertPrefixInKey(urlKey, string(id))
+	conn.Command("SET", key, data).Expect("ok")
 
 	shorten, err := url.SaveURL(conn)
 	if err != nil {
@@ -85,7 +88,8 @@ func process(data string, id int64) (string, string, error) {
 	}
 	// fetching
 	conn.Clear()
-	conn.Command("GET", id).Expect(data)
+	key = insertPrefixInKey(urlKey, string(id))
+	conn.Command("GET", key).Expect(data)
 	dbURL, err := DbGetURL(shorten, conn)
 	return shorten, dbURL, err
 }
