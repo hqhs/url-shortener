@@ -32,7 +32,20 @@ func TestSingleUrl(t *testing.T) {
 }
 
 func TestMultipleUrls(t *testing.T) {
-
+	urls := []string{
+		"stackoverflow.com",
+		"blog.golang.org",
+		"play.google.com/music/",
+		"gist.github.com",
+	}
+	id := int64(1)
+	for _, url := range urls {
+		_, decoded, err := process(url, id)
+		id++
+		if strings.Compare(decoded, url) != 0 || err != nil {
+			t.Errorf("url processed wrong: %v", url)
+		}
+	}
 }
 
 func TestDuplicateUrl(t *testing.T) {
@@ -46,7 +59,11 @@ func TestDuplicateUrl(t *testing.T) {
 }
 
 func TestInvalidUrl(t *testing.T) {
-
+	url := "NotAValiURL"
+	_, _, err := process(url, int64(1))
+	if err != nil {
+		t.Errorf("non valid url shortened: %v", url)
+	}
 }
 
 func process(data string, id int64) (string, string, error) {
