@@ -2,16 +2,23 @@ package main
 
 import (
 	"net/http"
+	"fmt"
 
 	"github.com/go-chi/render"
 )
 
 // ShortenURL is api endpoint for creating short versions of urls
-func ShortenURL(w http.ResponseWriter, r *http.Request) {
-
+func (a *API) ShortenURL(w http.ResponseWriter, r *http.Request) {
+	data := r.Form.Get("url")
+	fmt.Println(data)
+	url, _ := ParseURL(data)
+	conn := a.pool.Get()
+	defer conn.Close()
+	shorten, _ := url.SaveURL(conn)
+	w.Write([]byte(shorten))
 }
 
-// Redirect URL redirects from short url to its original
+// RedirectURL redirects from short url to its original
 func RedirectURL(w http.ResponseWriter, r *http.Request) {
 
 }

@@ -48,7 +48,7 @@ func NewRouter(pool *redis.Pool) *chi.Mux {
 	// RESTy routes for "articles" resource
 	r.Route("/api", func(r chi.Router) {
 		r.Use(render.SetContentType(render.ContentTypeJSON))
-		r.Use(GetDatabaseMiddleware(pool))
+		// r.Use(GetDatabaseMiddleware(pool))
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("root."))
@@ -62,7 +62,8 @@ func NewRouter(pool *redis.Pool) *chi.Mux {
 			panic("test")
 		})
 
-		r.Mount("/v1", APIv1())
+		api := newAPI(pool)
+		r.Mount("/v1", api.router())
 
 		r.With(Paginate).Get("/", ListArticles)
 		r.Post("/", CreateArticle)       // POST /articles
@@ -85,11 +86,20 @@ func NewRouter(pool *redis.Pool) *chi.Mux {
 	return r
 }
 
-// APIv1 initializes router for first api version
-func APIv1() chi.Router {
+// API ...
+type API struct {
+	pool *redis.Pool
+	r *chi.Mux
+}
+
+func newAPI(p *redis.Pool) *API {
 	r := chi.NewRouter()
-	r.Post("/shorten", ShortenURL)
-	return r
+	return &API{p, r}
+}
+
+func (a *API) router() chi.Router {
+	a.r.Post("/shorten", a.ShortenURL)
+	return a.r
 }
 
 // A completely separate router for administrator routes
