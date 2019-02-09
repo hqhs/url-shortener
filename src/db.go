@@ -1,13 +1,13 @@
 package main
 
 import (
-	"time"
+	"encoding/base64"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/rand"
 	"net/url"
-	"encoding/binary"
-	"encoding/base64"
+	"time"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -20,7 +20,7 @@ const (
 
 // IdKey used for
 const IdKey = "url:id"
-	// append([]byte{ urlIDCounter }, []byte("urlId")...)
+
 
 // GetOrCreateID TODO
 func GetOrCreateID(conn redis.Conn) (int64, error) {
@@ -35,16 +35,15 @@ func GetOrCreateID(conn redis.Conn) (int64, error) {
 // NewPool initializes database connection
 func NewPool(addr string) *redis.Pool {
 	return &redis.Pool{
-		MaxIdle: 3,
+		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
-		Dial: func() (redis.Conn, error) { return redis.Dial("tcp", addr) },
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", addr) },
 	}
 }
 
 //--
 // Data model objects and persistence mocks:
 //--
-
 
 // URL represents a 'Uniform Resource Locator' :)
 type URL struct {
@@ -117,9 +116,9 @@ func insertPrefixInKey(prefix byte, key string) []byte {
 	return append([]byte{prefix}, []byte(key)...)
 }
 
-
 // Stats represents shorter url usage statistics
 type Stats struct {
+	URL     URL
 	created time.Time
 }
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/rafaeljusto/redigomock"
 )
@@ -16,8 +16,7 @@ func TestEncodeDecode(t *testing.T) {
 		t.Errorf("Unexpected error: %s\n", err)
 	}
 	if id != decodedID {
-		t.Errorf("encoding/Decoding does not work, id: %v, decodedID: %v", id,
-			decodedID)
+		t.Errorf("encoding/Decoding does not work, id: %v, decodedID: %v", id, decodedID)
 	}
 }
 
