@@ -14,42 +14,25 @@ type Service struct {
 	db Database
 }
 
+// NewService initializes url-shortener service with database connection and url schema
 func NewService() Service {
 	r := chi.NewRouter()
 	db := newMockDatabase()
-	// db := redis.NewDBDriver()
+	// db, err := redis.NewDBDriver()
 	s := Service{r, db}
 	s.InitRouter()
-	// Simple health check: make ping request, get or create url id
-	// conn := p.Get()
-	// defer conn.Close()
-	// _, err := redis.String(conn.Do("PING", ""))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// id, err := GetOrCreateID(conn)
 	return s
 }
 
+// Serve starts http server
 func (s *Service) Serve() {
 	http.ListenAndServe(":3333", s.r)
 }
 
+// RoutesDoc ...
 func (s *Service) RoutesDoc() string {
 	return docgen.MarkdownRoutesDoc(s.r, docgen.MarkdownOpts{
 		ProjectPath: "github.com/go-chi/chi",
 		Intro:       "Welcome to the chi/_examples/rest generated docs.",
 	})
 }
-// func main() {
-
-// 	p := NewPool("redis:6379")
-
-// 	fmt.Printf("url id starts with: %v\n", id)
-
-// 	r := NewRouter(p)
-// 	fmt.Println("Initialized router...")
-
-
-// 	http.ListenAndServe(":3333", r)
-// }

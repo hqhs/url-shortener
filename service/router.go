@@ -43,10 +43,9 @@ func (s *Service) InitRouter() {
 	s.r.Use(middleware.Recoverer)
 	s.r.Use(middleware.URLFormat)
 
-	// RESTy routes for "articles" resource
+	// REST api declarations
 	s.r.Route("/api", func(r chi.Router) {
 		r.Use(render.SetContentType(render.ContentTypeJSON))
-		// r.Use(GetDatabaseMiddleware(pool))
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("root."))
@@ -63,22 +62,8 @@ func (s *Service) InitRouter() {
 		// r.Mount("/v1", api)
 		r.Route("/v1", func(r chi.Router) {
 			r.Post("/shorten", s.ShortenURL)
-			r.Get("/stats/{shortURL}", s.GetURLStats)
+			r.With(Paginate).Get("/stats/{shortURL}", s.GetURLStats)
 		})
-
-		r.With(Paginate).Get("/", ListArticles)
-		r.Post("/", CreateArticle)       // POST /articles
-		r.Get("/search", SearchArticles) // GET /articles/search
-
-		r.Route("/{articleID}", func(r chi.Router) {
-			r.Use(ArticleCtx)            // Load the *Article on the request context
-			r.Get("/", GetArticle)       // GET /articles/123
-			r.Put("/", UpdateArticle)    // PUT /articles/123
-			r.Delete("/", DeleteArticle) // DELETE /articles/123
-		})
-
-		// GET /articles/whats-up
-		r.With(ArticleCtx).Get("/{articleSlug:[a-z-]+}", GetArticle)
 	})
 
 	s.r.Get("/{shortURL}", s.RedirectURL)
