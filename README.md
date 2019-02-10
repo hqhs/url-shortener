@@ -26,27 +26,43 @@ bit.ly statistics is ([link]( http://highscalability.com/blog/2014/7/14/bitly-le
  Obviously we need to choose database wisely. Out data structure is fixed,
  with small quantities, we don't need atomicity.
  
-|                              | postgres/mysql | redis cluster | mongo   | hadoop  | clickhouse |
-|:-----------------------------|----------------|:--------------|:--------|:--------|:-----------|
-| structured                   | **yes**        | no            | **yes** | **yes** | **yes**    |
-| easy to scale                | no             | **yes**       | **yes** | **yes** | **yes**    |
-| easy to get up and running   | **yes**        | **yes**       | **yes** | no      | **yes**    |
-| fast with our data structure | no             | **yes**       | no      | **yes** | **yes**    |
-| easy to maintain             | **yes**        | **yes**       | no      | no      | **yes**    |
-| reliable                     | **yes**        | no            | no      | **yes** | **yes**    |
-
- **NOTE**: this is simple and very opinionated binary analysis based on my
- experience and limited knowledge. Purpose of this comparison is consider
- different options with given conditions. Your choice may differ, but feel free
- to argue!
+ We dont need rdbms -- data is too simple, not column store -- there's no need
+ for searching/sorting, not graph db -- there's no graph, not document store -- 
+ this is not the fastest option. What we need is key/value store, which is
+ reliable out-of-the-box (hence not redis cluster), easy to scale (simple
+ clustering), and easy to get up and running (**not** a hadoop cluster).
 
  Remember, what statistics above taken from startup which is **primary** product
  is URL shortening & analytics service. Just copy-pasting their architecture
  (and choosing hadoop) solutions doesn't fit because we shouldn't **expect**
  such traffic. Our goal is to find balance between scale fees and time to get
- service up and running fast.
+ service up and running.
  
 ## URL shortener algorithm choice
+
+Hash or not to hash?
+
+Let short(url) 
+be a function what returns number, which we base64 encode later.
+We want our service to start with 6 chars for one url, so should always be
+short(url) > 64^5 + 1.
+
+Variant 0: use counter starting with 64^5 + 1, increment it after each url, 
+convert it with base64 encoding
+
+``` python
+def int2base64(x):
+    'convert an integer to its url safe string representation in a given base'
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+    rets=''
+    while x>0:
+        x,idx = divmod(x,64)
+        rets = alphabet[idx] + rets
+    return rets
+```
+
+Variant 1: use  n
+
 
 ## statistics: codebase size & time spent
 
