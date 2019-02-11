@@ -93,7 +93,7 @@ unique keys from zookeper and use it.
 
 Issue: Zookeper is a single point of failure and adds unnecessary entities.
 
-First option has good price/perfomance ration. I'm going with it.
+First option has good price/performance ration. I'm going with it.
 
 ## Data partitioning
 
