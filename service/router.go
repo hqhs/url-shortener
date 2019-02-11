@@ -43,6 +43,8 @@ func (s *Service) InitRouter() {
 	s.r.Use(middleware.Recoverer)
 	s.r.Use(middleware.URLFormat)
 
+
+	s.r.Get("/{url}", s.RedirectURL)
 	// REST api declarations
 	s.r.Route("/api", func(r chi.Router) {
 		r.Use(render.SetContentType(render.ContentTypeJSON))
@@ -65,6 +67,4 @@ func (s *Service) InitRouter() {
 			r.With(Paginate).Get("/stats/{shortURL}", s.GetURLStats)
 		})
 	})
-
-	s.r.Get("/{shortURL}", s.RedirectURL)
 }

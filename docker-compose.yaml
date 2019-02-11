@@ -9,19 +9,13 @@ services:
       - ./dbdata:/app/dbdata
       - ./static:/app/static
       - ./config.yaml:/app/config.yaml
-      - ./src:/app/src
-    working_dir: /app/src
-    env_file:
-      - .env
-    environment:
-      - CGO_ENABLED=0
+      - ./service:/app/servise
+      - ./tmp:/app/tmp
+    working_dir: /app
     networks:
       - redis-net
     depends_on:
       - redis
-    command:
-      - /go/bin/fresh
-    restart: always
 
   redis:
     image: redis:5.0.3-alpine

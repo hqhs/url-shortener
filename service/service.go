@@ -4,23 +4,24 @@ import (
 	"net/http"
 
 	// "example.com/url-shortener/redis"
-	"github.com/go-chi/docgen"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/docgen"
 )
 
 // Service replresent state of url-shortener service
 type Service struct {
-	r *chi.Mux
-	db Database
+	Domain string
+	// Port   string
+	r      *chi.Mux
+	db     Database
 }
 
 // NewService initializes url-shortener service with database connection and url schema
-func NewService() Service {
+func NewService(domain string, driver func() (Database, error)) Service {
 	// new comment
 	r := chi.NewRouter()
-	db := newMockDatabase()
-	// db, err := redis.NewDBDriver()
-	s := Service{r, db}
+	db, _ := driver()
+	s := Service{domain, r, db}
 	s.InitRouter()
 	return s
 }
