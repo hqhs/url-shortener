@@ -1,18 +1,32 @@
 Classic service example: URL shortener
 ===
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Classic service example: URL shortener](#classic-service-example-url-shortener)
+    - [Features](#features)
+    - [TODO: Code coverage](#todo-code-coverage)
+    - [Used sources](#used-sources)
+    - [Database choice](#database-choice)
+    - [URL shortener algorithm choice](#url-shortener-algorithm-choice)
+    - [Possible improvements](#possible-improvements)
+        - [Thottling](#thottling)
+        - [Caching](#caching)
+        - [Load balancing](#load-balancing)
+        - [Other possible improvements](#other-possible-improvements)
+    - [Actual deployment configuration with Kubernetes](#actual-deployment-configuration-with-kubernetes)
+    - [Contributing](#contributing)
+
+<!-- markdown-toc end -->
+
 ## Features
 
 - simple analytics
-- ready-to-use kubernetes cluster for db & services.
+- ready for high-load
 
 ## TODO: Code coverage
 
-## Used sources
-
-- []
-
-  
 
 ## Database choice
 
