@@ -6,6 +6,7 @@ import (
 
 	"github.com/hqhs/url-shortener/service"
 	"github.com/hqhs/url-shortener/redis"
+	kitlog "github.com/go-kit/kit/log"
 )
 
 var routes = flag.Bool("routes", false, "Generate router documentation")
@@ -29,7 +30,13 @@ func main() {
 		"localhost:6379",
 		NewRedisInstance,
 	}
-	service := service.NewService(nil, options)
+	// NOTE here I just pipe all logging from kitlog to stdlib log package,
+	// which is seems useless. But default chi-router logging middleware
+	// uses stdlib, and re-writing it seems like a lot of work and valid
+	// pull-request %)
+	// I'll do it later
+	logger := kitlog.NewLogfmtLogger(kitlog.StdlibWriter{})
+	service, _ := service.NewService(logger, options)
 	// Passing -routes to the program will generate docs for the above
 	// router definition. See the `routes.json` file in this folder for
 	// the output.
