@@ -10,29 +10,33 @@ import (
 	"encoding/json"
 )
 
+func short(service *Service, u string) (*httptest.ResponseRecorder, error) {
+	payload := []byte(fmt.Sprintf(`{"url":"%s"}`, u))
+	url := fmt.Sprintf("http://%s/api/v1/shorten", service.Domain)
+	rr := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload))
+	if err != nil {
+		return rr, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	service.r.ServeHTTP(rr, req)
+	return rr, err
+}
+
 func TestApiShortening(t *testing.T) {
 	service := NewService("localhost", NewMockDatabase)
 	t.Run("single url", func(t *testing.T) {
 		payloadURL := "https://www.google.com/search?q=golang+specification"
-		payload := []byte(fmt.Sprintf(`{"url":"%s"}`, payloadURL))
-		url := fmt.Sprintf("http://%s/api/v1/shorten", service.Domain)
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload))
-		if err != nil {
-			t.Fatal(err)
-		}
-		req.Header.Set("Content-Type", "application/json")
-		rr := httptest.NewRecorder()
-		service.r.ServeHTTP(rr, req)
+		rr, err := short(&service, payloadURL)
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: %v, want: %v", status, http.StatusOK)
 		}
-		d := json.NewDecoder(rr.Body)
 		response := URLRequest{}
-		d.Decode(&response)
+		json.Unmarshal(rr.Body.Bytes(), &response)
 		// check if redirect works
 		rr = httptest.NewRecorder()
-		url = fmt.Sprintf("http://%s", response.RedirectURL)
-		req, err = http.NewRequest(http.MethodGet, url, nil)
+		url := fmt.Sprintf("http://%s", response.RedirectURL)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,6 +50,25 @@ func TestApiShortening(t *testing.T) {
 		}
 	})
 	t.Run("invalid url", func(t *testing.T) {
-
+		// TODO
+		// payloadURL := "notAvalidURL"
+		// rr, err := short(&service, payloadURL)
+		// if err != nil {
+		// 	t.Fatal(err)
+		// }
+		// if status := rr.Code; status == http.StatusOK {
+		// 	t.Errorf("handler shortened invalid url: %v", payloadURL)
+		// }
 	})
+}
+
+func BenchmarkAPIShorten(b *testing.B) {
+	service := NewService("localhost", NewMockDatabase)
+	url := "http://www.reddit.com"
+	for n := 0; n < b.N; n++ {
+		if _, err := short(&service, url); err != nil {
+			// TODO: disable chi logging
+			b.Errorf("Unexpected error during benchmarking: %v", err)
+		}
+	}
 }

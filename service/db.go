@@ -5,24 +5,27 @@ import (
 	"sync"
 )
 
-// Database represent key-value store for service usage
+// Database represent persistent key-value store
 type Database interface {
 	Get(key []byte) ([]byte, error)
 	Set(key, value []byte) error
 }
 
+// MockDatabase implements Database interface, not persistent, bul well-suited for tests
 type MockDatabase struct {
 	data map[string][]byte
 	mut *sync.Mutex
 }
 
 
+// NewMockDatabase initializes MockDatabase
 func NewMockDatabase() (Database, error) {
 	data := make(map[string][]byte)
 	m := &sync.Mutex{}
 	return &MockDatabase{data, m}, nil
 }
 
+// Get takes key and return value if key is in storage, error otherwise
 func (m *MockDatabase) Get(key []byte) ([]byte, error) {
 	data, ok := m.data[string(key)]
 	if ok {
