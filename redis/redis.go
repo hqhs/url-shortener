@@ -1,12 +1,8 @@
 package redis
 
 import (
-	"encoding/base64"
-	"encoding/binary"
+	"math/big"
 	"fmt"
-	"net"
-	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -18,141 +14,59 @@ const (
 	urlKey
 )
 
-// IdKey used for
-const IdKey = "url:id"
+const counterKey = "counter:id"
 
+// Redis implements service.Database interface for redis connection pool
+// NOTE currently every call to /api/v1/shorten uses minimum two database
+// calls without connection caching. Fix it for perfomance imrpovement
 type Redis struct {
-
+	pool       *redis.Pool
+	counterKey []byte
 }
 
-func NewRedisConnection() *Redis {
+// NewRedisConnectionPool initializes reddis connection pool and do simple health check
+func NewRedisConnectionPool(addr string) (*Redis, error) {
 	// Simple health check: make ping request, get or create url id
-	// conn := p.Get()
-	// defer conn.Close()
-	// _, err := redis.String(conn.Do("PING", ""))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// id, err := GetOrCreateID(conn)
-	return &Redis{}
-}
-
-func (r *Redis) Get(key []byte) ([]byte, error) {
-	data := make([]byte, 0)
-	return data, nil
-}
-
-func (r *Redis) Set(key, value []byte) (error) {
-	return nil
-}
-
-// GetOrCreateID TODO
-func GetOrCreateID(conn redis.Conn) (int64, error) {
-	key := insertPrefixInKey(urlIDCounter, IdKey)
-	id, err := redis.Int64(conn.Do("GET", key))
-	if err != nil {
-		return redis.Int64(conn.Do("SET", key, 0))
-	}
-	return id, err
-}
-
-// NewPool initializes database connection
-func NewPool(addr string) *redis.Pool {
-	return &redis.Pool{
+	pool := &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", addr) },
 	}
-}
-
-//--
-// Data model objects and persistence mocks:
-//--
-
-// URL represents a 'Uniform Resource Locator' :)
-type URL struct {
-	Url   string
-	Stats Stats
-}
-
-// ParseURL parses raw string into URL structure and additional data such as: ip, request time etc
-func ParseURL(u string, r *http.Request) (URL, error) {
-	_, err := url.Parse(u)
+	conn := pool.Get()
+	defer conn.Close()
+	_, err := redis.String(conn.Do("PING", ""))
 	if err != nil {
-		return URL{}, err
+		return &Redis{}, err
 	}
-	stats := fetchStats(r)
-	return URL{u, stats}, nil
+	return &Redis{pool, []byte(counterKey)}, nil
 }
 
-// SaveURL saves given url and returns it's shorten version
-func (u *URL) SaveURL(conn redis.Conn) (string, error) {
-	s := u.Url
-	var key []byte
-	// TODO: add optional check there's no such url in database
-	key = insertPrefixInKey(urlStats, u.Url)
+// Get takes key and return value if key is in storage, error otherwise
+func (r *Redis) Get(key []byte) ([]byte, error) {
+	conn := r.pool.Get()
+	defer conn.Close()
+	return redis.Bytes(conn.Do("GET", key))
+}
 
-	key = insertPrefixInKey(urlIDCounter, IdKey)
-	id, _ := redis.Int64(conn.Do("GET", key))
-	conn.Do("INCR", key)
-
-	key = insertPrefixInKey(urlKey, string(id))
-	_, err := redis.String(conn.Do("SET", key, s))
+// Set tries to set value to provided key, return error if key already exists
+func (r *Redis) Set(key, value []byte) error {
+	conn := r.pool.Get()
+	defer conn.Close()
+	// https://redis.io/commands/setnx
+	i, err := redis.Int(conn.Do("SETNX", key, value))
 	if err != nil {
-		return "", err
+		return err
 	}
-	// FIXME is not url safe!
-	short := encodeURL(id)
-	return short, nil
-}
-
-func encodeURL(id int64) string {
-	bs := make([]byte, binary.MaxVarintLen64)
-	n := binary.PutVarint(bs, id)
-	bs = bs[:n]
-	return base64.StdEncoding.EncodeToString(bs)
-}
-
-// DbGetURL gets short url and decode it
-func DbGetURL(short string, conn redis.Conn) (string, error) {
-	id, err := decodeURL(short)
-	if err != nil {
-		return "", err
+	if i == 0 {
+		return fmt.Errorf("Key already exists")
 	}
-	key := insertPrefixInKey(urlKey, string(id))
-	return redis.String(conn.Do("GET", key))
+	return nil
 }
 
-func decodeURL(short string) (int64, error) {
-	bs, err := base64.StdEncoding.DecodeString(short)
-	if err != nil {
-		return int64(-1), err
-	}
-	id, n := binary.Varint(bs)
-	if n < 0 {
-		return int64(-1), fmt.Errorf("value larget then 64 bits")
-	} else if n == 0 {
-		return int64(-1), fmt.Errorf("buf too small")
-	}
-	return id, nil
-}
-
-func insertPrefixInKey(prefix byte, key string) []byte {
-	return append([]byte{prefix}, []byte(key)...)
-}
-
-// Stats represents shorter url usage statistics
-type Stats struct {
-	IP      net.IP
-	Created time.Time
-	Clicks  uint64
-}
-
-func fetchStats(r *http.Request) Stats {
-	ip := net.ParseIP(r.RemoteAddr)
-	return Stats{ip, time.Now(), uint64(0)}
-}
-
-func dbGetStats(url string) (Stats, bool) {
-	return Stats{}, false
+// IncrementCounter increments counter by 1 and return new value
+// If there is no counter in database, return 0
+func (r *Redis) IncrementCounter() (*big.Int, error) {
+	conn := r.pool.Get()
+	defer conn.Close()
+	return big.NewInt(int64(0)), nil
 }

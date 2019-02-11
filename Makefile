@@ -1,13 +1,16 @@
 
 .PHONY: all
-all: build run
+all: build
+
+.PHONY: run
+run: build bootstrap
 
 .PHONY: build
 build:
 	go build -o bin/service .
 
-.PHONY: run
-run:
+.PHONY: bootstrap
+bootstrap:
 	./bin/service
 
 .PHONY: cache
@@ -16,4 +19,4 @@ cache:
 
 .PHONY: redis
 redis:
-	docker run -d -p 6379 redis
+	docker run -p "6379:6379" redis

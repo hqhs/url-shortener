@@ -32,7 +32,6 @@ func (u *URLRequest) Bind(r *http.Request) error {
 
 // Render pre-processes url before a response is marshalled and sent across the wire
 func (u *URLRequest) Render(w http.ResponseWriter, r *http.Request) error {
-	fmt.Printf("url: %v\n", u.RedirectURL)
 	return nil
 }
 

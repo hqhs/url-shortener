@@ -19,9 +19,9 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
-	counter, err := s.db.IncrementCounter()
 	for {
 		h := md5.New()
+		counter, err := s.db.IncrementCounter()
 		if err != nil {
 			// TODO: return 500, log error
 			render.Render(w, r, ErrInternal)

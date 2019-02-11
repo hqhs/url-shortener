@@ -24,7 +24,7 @@ type MockDatabase struct {
 }
 
 // NewMockDatabase initializes MockDatabase
-func NewMockDatabase() (Database, error) {
+func NewMockDatabase(addr string) (Database, error) {
 	data := make(map[string][]byte)
 	m := &sync.Mutex{}
 	return &MockDatabase{data, m}, nil

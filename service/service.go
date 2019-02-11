@@ -14,14 +14,15 @@ type Service struct {
 	// Port   string
 	r      *chi.Mux
 	db     Database
+	dbAddr string
 }
 
 // NewService initializes url-shortener service with database connection and url schema
-func NewService(domain string, driver func() (Database, error)) Service {
+func NewService(domain, dbAddr string, driver func(string) (Database, error)) Service {
 	// new comment
 	r := chi.NewRouter()
-	db, _ := driver()
-	s := Service{domain, r, db}
+	db, _ := driver(dbAddr)
+	s := Service{domain, r, db, dbAddr}
 	s.InitRouter()
 	return s
 }
