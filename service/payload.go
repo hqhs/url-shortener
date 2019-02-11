@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"net/http"
 	"net/url"
 
@@ -24,8 +25,14 @@ func (u *URLRequest) Bind(r *http.Request) error {
 	if len(u.OriginalURL) == 0 {
 		return fmt.Errorf("no url provided")
 	}
-	if _, err := url.Parse(u.OriginalURL); err != nil {
+	// NOTE Occasionally this is harder then it seems
+	// https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation
+	url, err := url.Parse(u.OriginalURL);
+	if err != nil {
 		return err
+	}
+	if len(url.Host) < 3 || !strings.ContainsAny(url.Host, ".")  {
+		return fmt.Errorf("Not a valid url")
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"crypto/md5"
 	"io"
+	"fmt"
 	"path"
 	"encoding/base64"
 
@@ -16,7 +17,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	// add form data support?
 	url := &URLRequest{}
 	if err := render.Bind(r, url); err != nil {
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrInvalidURL)
 		return
 	}
 	for {
@@ -37,11 +38,13 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			break
 		}
+		// TODO log error
+		fmt.Printf("error occured: %v\n", err)
 	}
-	url.RedirectURL = path.Join(s.domain, url.Key) // FIXME not a good idea
+	url.RedirectURL = path.Join(s.domain, url.Key) // FIXME not a good idea and port is not considered
 	if err := render.Render(w, r, url); err != nil {
 		// If service could not render it's own data, return 500 without explanation for client
-		// TODO: log error, at least. Or add optional sentry support
+		// TODO: use logger. Maybe add optional sentry support?
 		render.Render(w, r, ErrInternal)
 		return
 	}

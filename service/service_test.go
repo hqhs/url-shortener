@@ -51,15 +51,14 @@ func TestApiShortening(t *testing.T) {
 		}
 	})
 	t.Run("invalid url", func(t *testing.T) {
-		// TODO
-		// payloadURL := "notAvalidURL"
-		// rr, err := short(&service, payloadURL)
-		// if err != nil {
-		// 	t.Fatal(err)
-		// }
-		// if status := rr.Code; status == http.StatusOK {
-		// 	t.Errorf("handler shortened invalid url: %v", payloadURL)
-		// }
+		payloadURL := "notAvalidURL"
+		rr, err := short(&service, payloadURL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if status := rr.Code; status == http.StatusOK {
+			t.Errorf("handler shortened invalid url: %v", payloadURL)
+		}
 	})
 }
 

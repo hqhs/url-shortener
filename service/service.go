@@ -6,7 +6,7 @@ import (
 	// "example.com/url-shortener/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
-	"github.com/go-kit/kit/log"
+	kitlog "github.com/go-kit/kit/log"
 )
 
 // Options represents Service configuration
@@ -24,17 +24,17 @@ type Service struct {
 	r      *chi.Mux
 	db     Database
 	dbAddr string
-	logger log.Logger
+	logger kitlog.Logger
 }
 
 // NewService initializes url-shortener service with database connection and url schema
-func NewService(logger log.Logger, o Options) (Service, error) {
+func NewService(logger kitlog.Logger, o Options) (Service, error) {
 	db, err := o.Driver(o.DbAddr)
 	if err != nil {
 		return Service{}, nil
 	}
 	if logger == nil {
-		logger = log.NewNopLogger()
+		logger = kitlog.NewNopLogger()
 	}
 	s := Service{
 		o.Domain,
