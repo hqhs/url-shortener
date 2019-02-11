@@ -5,9 +5,8 @@ Classic service example: URL shortener
 **Table of Contents**
 
 - [Classic service example: URL shortener](#classic-service-example-url-shortener)
+    - [Abstract](#abstract)
     - [Features](#features)
-    - [TODO: Code coverage](#todo-code-coverage)
-    - [Used sources](#used-sources)
     - [Database choice](#database-choice)
     - [URL shortener algorithm choice](#url-shortener-algorithm-choice)
     - [Possible improvements](#possible-improvements)
@@ -17,16 +16,17 @@ Classic service example: URL shortener
         - [Other possible improvements](#other-possible-improvements)
     - [Actual deployment configuration with Kubernetes](#actual-deployment-configuration-with-kubernetes)
     - [Contributing](#contributing)
+        - [Run in docker](#run-in-docker)
+        - [Run without docker](#run-without-docker)
 
 <!-- markdown-toc end -->
+
+## Abstract
 
 ## Features
 
 - simple analytics
-- ready for high-load
-
-## TODO: Code coverage
-
+- ready to scale for high-load
 
 ## Database choice
 
@@ -121,4 +121,8 @@ After 15 year I used 10^11 / 10^50 = 1/10^39 possible keys. Hence each
 ## Actual deployment configuration with Kubernetes
 
 ## Contributing
+
+### Run in docker
+
+### Run without docker
 
