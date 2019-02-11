@@ -125,6 +125,10 @@ func NewArticleListResponse(articles []*Article) []render.Renderer {
 // Error response payloads & renderers
 //--
 
+
+var ErrInvalidURL = &ErrResponse{HTTPStatusCode: 400, StatusText: "Provided URL is not valid."}
+var ErrNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "Resource not found."}
+
 // ErrResponse renderer type for handling all sorts of errors.
 //
 // In the best case scenario, the excellent github.com/pkg/errors package
@@ -161,5 +165,3 @@ func ErrRender(err error) render.Renderer {
 		ErrorText:      err.Error(),
 	}
 }
-
-var ErrNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "Resource not found."}

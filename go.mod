@@ -1,7 +1,7 @@
 module github.com/hqhs/url-shortener
 
-replace example.com/url-shortener/service => ./service
+replace github.com/hqhs/url-shortener/service => ./service
 
-replace example.com/url-shortener/redis => ./redis
+replace github.com/hqhs/url-shortener/redis => ./redis
 
-require example.com/url-shortener/service v0.0.0
+require github.com/hqhs/url-shortener/service v0.0.0

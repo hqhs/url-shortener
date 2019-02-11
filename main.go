@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"example.com/url-shortener/service"
+	"github.com/hqhs/url-shortener/service"
 )
 
 var routes = flag.Bool("routes", false, "Generate router documentation")

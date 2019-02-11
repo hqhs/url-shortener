@@ -16,6 +16,7 @@ type Service struct {
 
 // NewService initializes url-shortener service with database connection and url schema
 func NewService() Service {
+	// new comment
 	r := chi.NewRouter()
 	db := newMockDatabase()
 	// db, err := redis.NewDBDriver()
