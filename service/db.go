@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"math/big"
 	"sync"
 )
 
@@ -9,14 +10,18 @@ import (
 type Database interface {
 	Get(key []byte) ([]byte, error)
 	Set(key, value []byte) error
+	// Separate method for counter is used because
+	// incrementing and getting new value should be atomic operation
+	IncrementCounter() (*big.Int, error)
 }
+
+const counterKey = "counter:id"
 
 // MockDatabase implements Database interface, not persistent, bul well-suited for tests
 type MockDatabase struct {
-	data map[string][]byte
-	mut *sync.Mutex
+	data       map[string][]byte
+	mut        *sync.Mutex
 }
-
 
 // NewMockDatabase initializes MockDatabase
 func NewMockDatabase() (Database, error) {
@@ -43,4 +48,20 @@ func (m *MockDatabase) Set(key, value []byte) error {
 	}
 	m.data[string(key)] = value
 	return nil
+}
+
+// IncrementCounter increments counter by 1 and return new value
+// If there is no counter in database, return 0
+func (m *MockDatabase) IncrementCounter() (*big.Int, error) {
+	counter := big.NewInt(int64(0))
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	if data, ok := m.data[counterKey]; ok {
+		counter = counter.SetBytes(data)
+		counter = counter.Add(counter, big.NewInt(int64(0)))
+		m.data[counterKey] = counter.Bytes()
+		return counter, nil
+	}
+	m.data[counterKey] = counter.Bytes()
+	return counter, nil
 }

@@ -42,6 +42,7 @@ func (u *URLRequest) Render(w http.ResponseWriter, r *http.Request) error {
 
 var ErrInvalidURL = &ErrResponse{HTTPStatusCode: 400, StatusText: "Provided URL is not valid."}
 var ErrURLNotFound = &ErrResponse{HTTPStatusCode: 404, StatusText: "URL for provided key not found."}
+var ErrInternal = &ErrResponse{HTTPStatusCode: 500, StatusText: "Internal server error."}
 
 // ErrResponse renderer type for handling all sorts of errors.
 //

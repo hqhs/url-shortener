@@ -3,9 +3,7 @@ package service
 import (
 	"net/http"
 	"crypto/md5"
-	"strconv"
 	"io"
-	"time"
 	"path"
 	"encoding/base64"
 
@@ -21,17 +19,21 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrRender(err))
 		return
 	}
+	counter, err := s.db.IncrementCounter()
 	for {
 		h := md5.New()
-		now := time.Now().UnixNano()
-		// FIXME there's still some probability what we got duplicate shortens
-		// for same link, use counter instead of unix time
-		io.WriteString(h, strconv.FormatInt(now, 10))
+		if err != nil {
+			// TODO: return 500, log error
+			render.Render(w, r, ErrInternal)
+			return
+		}
+		// NOTE: remove []byte -> string conversion for small perfomance boost
+		io.WriteString(h, string(counter.Bytes()))
 		io.WriteString(h, url.OriginalURL)
 		hash := h.Sum(nil) // 16 bytes of md5 hash
 		encoded := base64.RawURLEncoding.EncodeToString(hash) // url safe rfc4648 base64 encoding
 		url.Key = encoded[0:6]
-		err := s.db.Set([]byte(url.Key), []byte(url.OriginalURL))
+		err = s.db.Set([]byte(url.Key), []byte(url.OriginalURL))
 		if err == nil {
 			break
 		}
@@ -40,7 +42,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	if err := render.Render(w, r, url); err != nil {
 		// If service could not render it's own data, return 500 without explanation for client
 		// TODO: log error, at least. Or add optional sentry support
-		render.Render(w, r, ErrRender(err))
+		render.Render(w, r, ErrInternal)
 		return
 	}
 }
