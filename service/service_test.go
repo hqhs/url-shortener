@@ -12,7 +12,7 @@ import (
 
 func short(service *Service, u string) (*httptest.ResponseRecorder, error) {
 	payload := []byte(fmt.Sprintf(`{"url":"%s"}`, u))
-	url := fmt.Sprintf("http://%s/api/v1/shorten", service.Domain)
+	url := fmt.Sprintf("http://%s:%s/api/v1/shorten", service.domain, service.port)
 	rr := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(payload))
 	if err != nil {
@@ -24,7 +24,8 @@ func short(service *Service, u string) (*httptest.ResponseRecorder, error) {
 }
 
 func TestApiShortening(t *testing.T) {
-	service := NewService("localhost", "", NewMockDatabase)
+	options := Options{"localhost", "", "", NewMockDatabase}
+	service, _ := NewService(nil, options)
 	t.Run("single url", func(t *testing.T) {
 		payloadURL := "https://www.google.com/search?q=golang+specification"
 		rr, err := short(&service, payloadURL)
@@ -63,7 +64,8 @@ func TestApiShortening(t *testing.T) {
 }
 
 func BenchmarkAPIShorten(b *testing.B) {
-	service := NewService("localhost", "", NewMockDatabase)
+	options := Options{"localhost", "", "", NewMockDatabase}
+	service, nil := NewService(nil, options)
 	url := "http://www.reddit.com"
 	for n := 0; n < b.N; n++ {
 		if _, err := short(&service, url); err != nil {

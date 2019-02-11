@@ -38,7 +38,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	url.RedirectURL = path.Join(s.Domain, url.Key) // FIXME not a good idea
+	url.RedirectURL = path.Join(s.domain, url.Key) // FIXME not a good idea
 	if err := render.Render(w, r, url); err != nil {
 		// If service could not render it's own data, return 500 without explanation for client
 		// TODO: log error, at least. Or add optional sentry support

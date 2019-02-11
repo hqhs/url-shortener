@@ -6,25 +6,46 @@ import (
 	// "example.com/url-shortener/redis"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
+	"github.com/go-kit/kit/log"
 )
+
+// Options represents Service configuration
+type Options struct {
+	Domain string
+	Port   string
+	DbAddr string
+	Driver func(string) (Database, error)
+}
 
 // Service replresent state of url-shortener service
 type Service struct {
-	Domain string
-	// Port   string
+	domain string
+	port   string
 	r      *chi.Mux
 	db     Database
 	dbAddr string
+	logger log.Logger
 }
 
 // NewService initializes url-shortener service with database connection and url schema
-func NewService(domain, dbAddr string, driver func(string) (Database, error)) Service {
-	// new comment
-	r := chi.NewRouter()
-	db, _ := driver(dbAddr)
-	s := Service{domain, r, db, dbAddr}
+func NewService(logger log.Logger, o Options) (Service, error) {
+	db, err := o.Driver(o.DbAddr)
+	if err != nil {
+		return Service{}, nil
+	}
+	if logger == nil {
+		logger = log.NewNopLogger()
+	}
+	s := Service{
+		o.Domain,
+		o.Port,
+		chi.NewRouter(),
+		db,
+		o.DbAddr,
+		logger,
+	}
 	s.InitRouter()
-	return s
+	return s, nil
 }
 
 // Serve starts http server

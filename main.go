@@ -23,7 +23,13 @@ func main() {
 	flag.Parse()
 	// TODO: bind env variables, such as host, port etc, ssl.
 	// service := service.NewService("localhost:3333", service.NewMockDatabase)
-	service := service.NewService("localhost:3333", "localhost:6379", NewRedisInstance)
+	options := service.Options{
+		"localhost",
+		"3333",
+		"localhost:6379",
+		NewRedisInstance,
+	}
+	service := service.NewService(nil, options)
 	// Passing -routes to the program will generate docs for the above
 	// router definition. See the `routes.json` file in this folder for
 	// the output.
