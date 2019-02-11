@@ -58,7 +58,7 @@ func (m *MockDatabase) IncrementCounter() (*big.Int, error) {
 	defer m.mut.Unlock()
 	if data, ok := m.data[counterKey]; ok {
 		counter = counter.SetBytes(data)
-		counter = counter.Add(counter, big.NewInt(int64(0)))
+		counter = counter.Add(counter, big.NewInt(int64(1)))
 		m.data[counterKey] = counter.Bytes()
 		return counter, nil
 	}
