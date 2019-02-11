@@ -30,7 +30,7 @@ bit.ly statistics is ([link]( http://highscalability.com/blog/2014/7/14/bitly-le
  
  6 * 10^9 * 26 bytes + 6 * 10^8 * 2 kb = 1.35 terabytes/month
  
- I need to choose database wisely. Take into account what our data has high
+ I need to choose database wisely. Take into account what data has high
 read/write ratio, practically never change (so eventual consistency means just
 consistency), not structured (until I add users in the future), and record size
 is small (around 2kb).
@@ -59,22 +59,11 @@ Hash or not to hash?
 **Variant 0: database sequence**:
 
 Let short(url) be a function what returns different number for different urls,
-which I base64 encode later. I want our service to start with N chars for one
+which I base64 encode later. I want service to start with N chars for one
 url, so short(url) > 64^N + 1. I could use counter starting with 64^N + 1,
 increment it after each url, convert it to base64 encoding.
 
 Issue: It's easy to iterate over all urls. 
-
-``` python
-def int2base64(x):
-    'convert an integer to its url safe string representation in a given base'
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-    rets=''
-    while x>0:
-        x,idx = divmod(x,64)
-        rets = alphabet[idx] + rets
-    return rets
-```
 
 **Variant 1: Hashing**: 
 hash(url, timestamp** and get N chars from result, make sure it's unique, get
