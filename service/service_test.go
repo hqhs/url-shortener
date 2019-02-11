@@ -24,7 +24,7 @@ func short(service *Service, u string) (*httptest.ResponseRecorder, error) {
 }
 
 func TestApiShortening(t *testing.T) {
-	service := NewService("localhost", NewMockDatabase)
+	service := NewService("localhost", "", NewMockDatabase)
 	t.Run("single url", func(t *testing.T) {
 		payloadURL := "https://www.google.com/search?q=golang+specification"
 		rr, err := short(&service, payloadURL)
@@ -63,7 +63,7 @@ func TestApiShortening(t *testing.T) {
 }
 
 func BenchmarkAPIShorten(b *testing.B) {
-	service := NewService("localhost", NewMockDatabase)
+	service := NewService("localhost", "", NewMockDatabase)
 	url := "http://www.reddit.com"
 	for n := 0; n < b.N; n++ {
 		if _, err := short(&service, url); err != nil {
