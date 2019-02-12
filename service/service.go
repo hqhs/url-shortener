@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/oxtoacart/bpool"
 )
 
 // Options represents Service configuration
@@ -25,6 +26,7 @@ type Service struct {
 	db     Database
 	dbAddr string
 	logger kitlog.Logger
+	bpool  *bpool.BufferPool
 }
 
 // NewService initializes url-shortener service with database connection and url schema
@@ -43,6 +45,7 @@ func NewService(logger kitlog.Logger, o Options) (Service, error) {
 		db,
 		o.DbAddr,
 		logger,
+		bpool.NewBufferPool(64),
 	}
 	s.InitRouter()
 	return s, nil

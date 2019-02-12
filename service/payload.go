@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
-	"strings"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/go-chi/render"
 )
@@ -18,6 +18,8 @@ type URLRequest struct {
 	OriginalURL string `json:"url"`
 	Key         string `json:"-"`
 	RedirectURL string `json:"shortened-url"`
+	CreatedAt   int64  `json:"created-at"`
+	RemoteAddr  string `json:"-"`
 }
 
 // Bind on ShortenedURL will run after the unmarshalling is complete
@@ -27,11 +29,11 @@ func (u *URLRequest) Bind(r *http.Request) error {
 	}
 	// NOTE Occasionally this is harder then it seems
 	// https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation
-	url, err := url.Parse(u.OriginalURL);
+	url, err := url.Parse(u.OriginalURL)
 	if err != nil {
 		return err
 	}
-	if len(url.Host) < 3 || !strings.ContainsAny(url.Host, ".")  {
+	if len(url.Host) < 3 || !strings.ContainsAny(url.Host, ".") {
 		return fmt.Errorf("Not a valid url")
 	}
 	return nil

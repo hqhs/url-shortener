@@ -8,12 +8,6 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-const (
-	urlStats byte = iota
-	urlIDCounter
-	urlKey
-)
-
 const counterKey = "counter:id"
 
 // Redis implements service.Database interface for redis connection pool

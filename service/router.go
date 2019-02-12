@@ -57,10 +57,6 @@ func (s *Service) InitRouter() {
 			w.Write([]byte("pong"))
 		})
 
-		r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
-			panic("test")
-		})
-
 		// r.Mount("/v1", api)
 		r.Route("/v1", func(r chi.Router) {
 			r.Post("/shorten", s.ShortenURL)
