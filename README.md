@@ -21,6 +21,13 @@ Average reading time: 10-15 minutes.
 
 <!-- markdown-toc end -->
 
+``` sh
+go test -cover
+PASS
+coverage: 70.1% of statements
+ok      github.com/hqhs/url-shortener/service   0.019s
+```
+
 ## Abstract
 
 This is a thought experiment about engineering url-shortener service with high
