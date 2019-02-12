@@ -48,21 +48,21 @@ be slightly structured), and the record size is small (around 2kb).
  
  I don't need relational database -- data is too simple, not column stored, thus
 there's no need for searching/sorting, not a graph db -- there's no graph, not
-document stored -- this is not the fastest available option.*поясни, пожалуйста, что означает тире в каждом конкретном случае* What I need is
+document stored -- this is not the fastest available option. What I need is
 key/value store, which is reliable out of the box, easy to scale, and easy to
 get up and running.
 
  So, for bit.ly comparable traffic I can use AerospikeDB, Apache
 Cassandra, Riak, or DynamoDB (those are the most popular, there are other choices). 
 
- Remember, that statistics above were taken from startup which has URL shortening and analytics service as its **primary** product. 
-Just copy-pasting their architecture 
-(and choosing hadoop) solutions doesn't fit because I can't **expect** such
-traffic. And I'm not competent enough for building infrastructure capable to
-withstand **real** high load traffic (though someday I will be), so for purpose of
-making a working demo I'm going with redis cluster and implement database
-connection as golang interface, which allows us to quickly change database when
-needed.
+ Remember, that statistics above were taken from startup which has URL
+shortening and analytics service as its **primary** product. Just copy-pasting
+their architecture (and choosing hadoop) solutions doesn't fit because I can't
+**expect** such traffic. And I'm not competent enough for building
+infrastructure capable to withstand **real** high load traffic (though someday I
+will be), so for purpose of making a working demo I'm going with redis cluster
+and implement database connection as golang interface, which allows us to
+quickly change database when needed.
 
 ## URL shortener algorithm choice
 
@@ -74,9 +74,9 @@ after usage.
 
 Issue: It's easy to iterate over all URLs.
 - **Option 1: Hash based algorithm with counter**: 
-Hash requested URL, base64 encode it, take first N chars, check that received 
-key is unique in database. *можешь мне это предложение перевести? не понимаю, что имеется в виду* To enforce different keys for the same URLs hash with
-counter technique from previous variant.
+Hash requested URL, base64 encode hash result, take first N chars, check that
+received key is unique in database. To enforce different keys for the same URLs
+hash use counter technique from previous variant.
 
 Issue: It's slows down over time. Let's calculate degradation speed.
 Given N=6 there are ~6^64 or ~10^50 possible keys. With 6 * 10^8 request/month
@@ -91,7 +91,7 @@ Use separate (let's call it zookeper) service which pre-generates keys for
 service nodes. When node bootstraps or runs out of keys it requests a new set of
 unique keys from zookeper and uses it.
 
-Issue: Zookeper is a single point of failure and adds unnecessary entities. *Переведи тут тоже плз*
+Issue: Zookeper is a single point of failure and adds unnecessary entities.
 
 First option has good price/performance ratio. I'm going with it.
 
@@ -121,7 +121,7 @@ cookie (or allow users to register themselves) for each user, build profile with
 their interests based on their requested URLs, and show advertising based on
 this profile (or just sell data). The simplest way to find correlation between a URL
 and interests is to parse destination page's SEO metatags. Other way to monetize
-(bit.ly uses it) is analytics selling for registered users (such as click rate etc.) *Переведи последнее предложение, плз*
+(bit.ly uses it) is analytics selling to registered users (such as click rate etc.)
 
 ## Actual deployment configuration with Kubernetes
 
