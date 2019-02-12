@@ -7,6 +7,7 @@ import (
 	"github.com/hqhs/url-shortener/service"
 	"github.com/hqhs/url-shortener/redis"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 )
 
 var routes = flag.Bool("routes", false, "Generate router documentation")
@@ -35,8 +36,13 @@ func main() {
 	// uses stdlib, and re-writing it seems like a lot of work and valid
 	// pull-request %)
 	// I'll do it later
+	// TODO allow user defined default log level
 	logger := kitlog.NewLogfmtLogger(kitlog.StdlibWriter{})
-	service, _ := service.NewService(logger, options)
+	logger = level.NewFilter(logger, level.AllowInfo())
+	service, err := service.NewService(logger, options)
+	if err != nil {
+		panic(err)
+	}
 	// Passing -routes to the program will generate docs for the above
 	// router definition. See the `routes.json` file in this folder for
 	// the output.

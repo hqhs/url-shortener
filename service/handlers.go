@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/go-chi/chi"
+	"github.com/go-kit/kit/log/level"
 )
 
 // ShortenURL is api endpoint for creating short versions of urls
@@ -24,7 +25,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		h := md5.New()
 		counter, err := s.db.IncrementCounter()
 		if err != nil {
-			// TODO: return 500, log error
+			level.Error(s.logger).Log("increment", "counter", "error", err)
 			render.Render(w, r, ErrInternal)
 			return
 		}
@@ -38,13 +39,15 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			break
 		}
-		// TODO log error
+		level.Error(s.logger).Log("key", "already", "exists", err)
 		fmt.Printf("error occured: %v\n", err)
 	}
-	url.RedirectURL = path.Join(s.domain, url.Key) // FIXME not a good idea and port is not considered
+	// FIXME not a good idea and port is not considered
+	url.RedirectURL = path.Join(s.domain, url.Key)
 	if err := render.Render(w, r, url); err != nil {
-		// If service could not render it's own data, return 500 without explanation for client
-		// TODO: use logger. Maybe add optional sentry support?
+		// If service could not render it's own data, return 500 without explanation
+		// Maybe add optional sentry support?
+		level.Error(s.logger).Log("rendering", "short", "URL", err)
 		render.Render(w, r, ErrInternal)
 		return
 	}
