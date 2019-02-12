@@ -71,7 +71,7 @@ func TestApiShortening(t *testing.T) {
 		// request stats
 		rr = httptest.NewRecorder()
 		payload := []byte(fmt.Sprintf(`{"url":"%s"}`, response.RedirectURL))
-		url := fmt.Sprintf("http://%s:%s/api/v1/stats", service.domain, service.port)
+		url := fmt.Sprintf("http://%s:%s/api/v1/original", service.domain, service.port)
 		req, _ := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(payload))
 		req.Header.Set("Content-Type", "application/json")
 		service.r.ServeHTTP(rr, req)
