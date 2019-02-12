@@ -60,6 +60,26 @@ func TestApiShortening(t *testing.T) {
 			t.Errorf("handler shortened invalid url: %v", payloadURL)
 		}
 	})
+	t.Run("url stats", func(t *testing.T) {
+		payloadURL := "https://www.google.com/search?q=golang+specification"
+		rr, err := short(&service, payloadURL)
+		if status := rr.Code; status != http.StatusOK || err != nil {
+			t.Errorf("handler returned wrong status code: %v, want: %v", status, http.StatusOK)
+		}
+		response := URLRequest{}
+		json.Unmarshal(rr.Body.Bytes(), &response)
+		// request stats
+		rr = httptest.NewRecorder()
+		payload := []byte(fmt.Sprintf(`{"url":"%s"}`, response.RedirectURL))
+		url := fmt.Sprintf("http://%s:%s/api/v1/stats", service.domain, service.port)
+		req, _ := http.NewRequest(http.MethodGet, url, bytes.NewBuffer(payload))
+		req.Header.Set("Content-Type", "application/json")
+		service.r.ServeHTTP(rr, req)
+		json.Unmarshal(rr.Body.Bytes(), &response)
+		if strings.Compare(response.OriginalURL, payloadURL) != 0 {
+			t.Errorf("URL does not match. Response %+v", response)
+		}
+	})
 }
 
 func BenchmarkAPIShorten(b *testing.B) {

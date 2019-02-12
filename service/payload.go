@@ -1,6 +1,7 @@
 package service
 
 import (
+	"time"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,12 +14,11 @@ import (
 // Request and Response payloads for the REST api.
 //--
 
-//
 type URLRequest struct {
 	OriginalURL string `json:"url"`
 	Key         string `json:"-"`
-	RedirectURL string `json:"shortened-url"`
-	CreatedAt   int64  `json:"created-at"`
+	RedirectURL string `json:"shortened-url,omitempty"`
+	CreatedAt   int64  `json:"created-at,omitempty"`
 	RemoteAddr  string `json:"-"`
 }
 
@@ -29,18 +29,32 @@ func (u *URLRequest) Bind(r *http.Request) error {
 	}
 	// NOTE Occasionally this is harder then it seems
 	// https://stackoverflow.com/questions/11809631/fully-qualified-domain-name-validation
-	url, err := url.Parse(u.OriginalURL)
-	if err != nil {
-		return err
-	}
-	if len(url.Host) < 3 || !strings.ContainsAny(url.Host, ".") {
+	if len(u.OriginalURL) < 3 || !strings.ContainsAny(u.OriginalURL, ".") {
 		return fmt.Errorf("Not a valid url")
 	}
+	if _, err := url.Parse(u.OriginalURL); err != nil {
+		return err
+	}
+	u.CreatedAt = time.Now().Unix()
+	// NOTE: this could be changed to analysis of x-forwarded-for header
+	u.RemoteAddr = r.RemoteAddr
 	return nil
 }
 
 // Render pre-processes url before a response is marshalled and sent across the wire
 func (u *URLRequest) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+type Stats struct {
+	URL string `json:"url"`
+}
+
+func (s *Stats) Bind(r *http.Request) error {
+	return nil
+}
+
+func (s *Stats) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 

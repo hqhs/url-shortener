@@ -60,7 +60,7 @@ func (s *Service) InitRouter() {
 		// r.Mount("/v1", api)
 		r.Route("/v1", func(r chi.Router) {
 			r.Post("/shorten", s.ShortenURL)
-			r.With(Paginate).Get("/stats/{shortURL}", s.GetURLStats)
+			r.Get("/stats", s.GetURLStats)
 		})
 	})
 }
