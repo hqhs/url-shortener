@@ -8,16 +8,13 @@ Average reading time: 10-15 minutes.
 
 - [Classic service example: URL shortener](#classic-service-example-url-shortener)
     - [Abstract](#abstract)
-    - [Features](#features)
     - [Database choice](#database-choice)
     - [URL shortener algorithm choice](#url-shortener-algorithm-choice)
     - [Data partitioning](#data-partitioning)
     - [Other possible improvements](#other-possible-improvements)
     - [Additional services](#additional-services)
-    - [Actual deployment configuration with Kubernetes](#actual-deployment-configuration-with-kubernetes)
-    - [Contributing](#contributing)
-        - [Run in docker](#run-in-docker)
-        - [Run without docker](#run-without-docker)
+    - [Actual deployment configuration with Kubernetes on Azure](#actual-deployment-configuration-with-kubernetes-on-azure)
+    - [Load testing on Azure](#load-testing-on-azure)
 
 <!-- markdown-toc end -->
 
@@ -130,11 +127,7 @@ this profile (or just sell data). The simplest way to find correlation between a
 and interests is to parse destination page's SEO metatags. Other way to monetize
 (bit.ly uses it) is analytics selling to registered users (such as click rate etc.)
 
-## Actual deployment configuration with Kubernetes
+## Actual deployment configuration with Kubernetes on Azure
 
-## Contributing
-
-### Run in docker
-
-### Run without docker
+## Load testing on Azure
 
