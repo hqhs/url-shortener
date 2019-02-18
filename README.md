@@ -126,8 +126,3 @@ their interests based on their requested URLs, and show advertising based on
 this profile (or just sell data). The simplest way to find correlation between a URL
 and interests is to parse destination page's SEO metatags. Other way to monetize
 (bit.ly uses it) is analytics selling to registered users (such as click rate etc.)
-
-## Actual deployment configuration with Kubernetes on Azure
-
-## Load testing on Azure
-
